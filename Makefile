@@ -26,6 +26,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@printf "  CC $<\n"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
+.PHONY: format
+format:
+	@clang-format -i $(shell find src -name "*.c" -o -name "*.h")
+
 .PHONY: clean
 clean:
 	@rm -rf $(BIN_DIR) $(BUILD_DIR) $(OBJ_DIR)

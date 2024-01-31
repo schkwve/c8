@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Jozef Nagy <schkwve@gmail.com>
+// SPDX-License-Identifier: MIT
+
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>

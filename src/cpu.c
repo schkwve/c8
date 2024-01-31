@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Jozef Nagy <schkwve@gmail.com>
+// SPDX-License-Identifier: MIT
+
 #include <stdio.h>
 #include <stdbool.h>
 

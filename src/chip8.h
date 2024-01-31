@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Jozef Nagy <schkwve@gmail.com>
+// SPDX-License-Identifier: MIT
+
 #ifndef CHIP8_H
 #define CHIP8_H
 
