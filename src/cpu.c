@@ -193,6 +193,18 @@ void cpu_execute(uint16_t instruction)
         }
 		case 0x0E: {
 			switch (nn) {
+			case 0x9E: {
+				if (g_machine.keypad[g_machine.cpu.v[x]] == 1) {
+					g_machine.cpu.pc += 2;
+				}
+				break;
+			}
+			case 0xA1: {
+				if (g_machine.keypad[g_machine.cpu.v[x]] != 1) {
+					g_machine.cpu.pc += 2;
+				}
+				break;
+			}
 			default: {
 				fprintf(stderr, "Instruction '%x' not implemented yet!\n", instruction);
 				break;
@@ -204,6 +216,32 @@ void cpu_execute(uint16_t instruction)
 			switch (nn) {
 			case 0x07: {
 				g_machine.cpu.v[x] = g_machine.cpu.delay_timer;
+				break;
+			}
+			case 0x0A: {
+				static bool pressed = 0;
+				static uint8_t key = 0xFF;
+
+				for (uint8_t i = 0; i < sizeof(g_machine.keypad) && key == 0xFF; i++) {
+					if (g_machine.keypad[i] == 1) {
+						key = i;
+						pressed = 1;
+						break;
+					}
+				}
+
+				if (pressed == 1) {
+					// wait until release
+					if (g_machine.keypad[key] == 0) {
+						g_machine.cpu.v[x] = key;
+						key = 0xFF;
+						pressed = 0;
+					} else {
+						g_machine.cpu.pc -= 2;
+					}
+				} else {
+					g_machine.cpu.pc -= 2;
+				}
 				break;
 			}
 			case 0x15: {
