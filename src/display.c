@@ -14,7 +14,7 @@ int display_init(void)
 		return EXIT_FAILURE;
 	}
 
-	g_machine.ren = SDL_CreateRenderer(g_machine.win, -1, SDL_RENDERER_ACCELERATED);
+	g_machine.ren = SDL_CreateRenderer(g_machine.win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (g_machine.ren == NULL) {
 		fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
 		return -1;

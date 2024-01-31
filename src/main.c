@@ -7,13 +7,12 @@
 #include "cpu.h"
 #include "display.h"
 #include "memory.h"
+#include "input.h"
 
 machine_t g_machine;
 
 int main(int argc, char *argv[])
 {
-	SDL_Event event;
-
 	// register an exit function
 	// to cleanup
 	atexit(cleanup_and_die);
@@ -46,19 +45,35 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	// ~700 instructions per second
-	struct timespec sleep_time = {0, 1428571};
+	// we are running!
+	g_machine.state = RUNNING;
 
 	// main loop
-    while (1) {
-        if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
-            break;
-		
-		cpu_execute(cpu_fetch());
+    while (g_machine.state != QUIT) {
+		const uint64_t start_time = SDL_GetTicks();
 
-		// update window
+		input_get();
+		if (g_machine.state == PAUSED) {
+			continue;
+		}
+        
+		cpu_execute(cpu_fetch());
         display_update();
 
+		if (g_machine.cpu.delay_timer > 0) {
+			g_machine.cpu.delay_timer--;
+		}
+		if (g_machine.cpu.sound_timer > 0) {
+			// TODO: play a beep
+			g_machine.cpu.sound_timer--;
+		} else {
+			// TODO: stop beeping
+		}
+
+		const uint64_t end_time = SDL_GetTicks() - start_time;
+
+		// ~700 instructions per second
+		struct timespec sleep_time = {0, 15000000 - end_time};
 		nanosleep(&sleep_time, NULL);
     }
 

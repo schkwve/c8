@@ -7,7 +7,16 @@
 #include "display.h"
 #include "memory.h"
 
+enum machine_state {
+	RUNNING,
+	PAUSED,
+	QUIT
+};
+
 typedef struct {
+	// general
+	enum machine_state state;
+
 	// display
 	SDL_Window *win;
 	SDL_Renderer *ren;
@@ -20,6 +29,12 @@ typedef struct {
 
 	// cpu
 	struct cpu cpu;
+
+	// input
+	uint8_t keypad[16];
+
+	// sound
+	uint16_t sound_volume;
 } machine_t;
 
 extern machine_t g_machine;
