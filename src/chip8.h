@@ -35,6 +35,8 @@ typedef struct {
 
 	// sound
 	uint16_t sound_volume;
+	SDL_AudioSpec sound_spec;
+	SDL_AudioDeviceID sound_dev;
 } machine_t;
 
 extern machine_t g_machine;

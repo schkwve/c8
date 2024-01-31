@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	srand((unsigned)time(&t));
 
 	// startup SDL
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
 		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
 		return EXIT_FAILURE;
 	}
@@ -50,14 +50,23 @@ int main(int argc, char *argv[])
 
 	// main loop
     while (g_machine.state != QUIT) {
-		const uint64_t start_time = SDL_GetTicks();
 
 		input_get();
 		if (g_machine.state == PAUSED) {
 			continue;
 		}
+
+		const uint64_t start_time = SDL_GetPerformanceCounter();
         
-		cpu_execute(cpu_fetch());
+		for (uint32_t i = 0; i < (700 / 60); i++) {
+			cpu_execute(cpu_fetch());
+		}
+
+		const uint64_t end_time = SDL_GetPerformanceCounter();
+		const double elapsed_time = (double)((end_time - start_time) * 1000) / SDL_GetPerformanceFrequency();
+
+		SDL_Delay(16.67f > elapsed_time ? 16.67f - elapsed_time : 0);
+
         display_update();
 
 		if (g_machine.cpu.delay_timer > 0) {
@@ -69,12 +78,6 @@ int main(int argc, char *argv[])
 		} else {
 			// TODO: stop beeping
 		}
-
-		const uint64_t end_time = SDL_GetTicks() - start_time;
-
-		// ~700 instructions per second
-		struct timespec sleep_time = {0, 15000000 - end_time};
-		nanosleep(&sleep_time, NULL);
     }
 
 	return EXIT_SUCCESS;
