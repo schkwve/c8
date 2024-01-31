@@ -23,6 +23,7 @@ typedef struct {
 	// values for the framebuffer can *only* be either 1 or 0.
 	// TODO: any other value should crash the program.
 	uint8_t framebuffer[64 * 32];
+	uint8_t should_render;
 
 	// memory
 	uint8_t memory[4096];

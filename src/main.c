@@ -74,7 +74,10 @@ int main(int argc, char *argv[])
 
 		SDL_Delay(16.67f > elapsed_time ? 16.67f - elapsed_time : 0);
 
-        display_update();
+		if (g_machine.should_render == 1) {
+			g_machine.should_render = 0;
+        	display_update();
+		}
 
 		if (g_machine.cpu.delay_timer > 0) {
 			g_machine.cpu.delay_timer--;

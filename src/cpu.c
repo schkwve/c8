@@ -189,6 +189,7 @@ void cpu_execute(uint16_t instruction)
 
                 if (++ren_y >= WINDOW_HEIGHT) break;
             }
+			g_machine.should_render = 1;
 			break;
         }
 		case 0x0E: {
