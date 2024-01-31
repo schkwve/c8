@@ -16,6 +16,8 @@ enum machine_state {
 typedef struct {
 	// general
 	enum machine_state state;
+	FILE *romfile;
+	char *rompath;
 
 	// display
 	SDL_Window *win;
@@ -41,6 +43,8 @@ typedef struct {
 } machine_t;
 
 extern machine_t g_machine;
+
+void chip8_reboot(void);
 
 void cleanup_and_die(void);
 

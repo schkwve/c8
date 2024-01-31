@@ -29,7 +29,7 @@ void input_get(void)
 						break;
 					}
 					case SDLK_F5: {
-						// chip8_reboot();
+						chip8_reboot();
 						break;
 					}
 					case SDLK_RIGHTBRACKET: {

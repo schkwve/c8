@@ -25,23 +25,24 @@ const uint8_t default_font[] = {
 	0xF0, 0x80, 0xF0, 0x80, 0x80,
 };
 
-int memory_init(char *rom_name)
+int memory_init(void)
 {
 	// zero out memory
 	memset(g_machine.memory, 0, 4096);
 
 	// load program into memory
-	FILE *rom = fopen(rom_name, "rb");
-	fseek(rom, 0, SEEK_END);
-	size_t romsize = ftell(rom);
-	rewind(rom);
+	g_machine.romfile = fopen(g_machine.rompath, "rb");
+	fseek(g_machine.romfile, 0, SEEK_END);
+	size_t romsize = ftell(g_machine.romfile);
+	rewind(g_machine.romfile);
 
 	if (romsize > (4096 - 0x200)) {
 		fprintf(stderr, "ROM is larger than 4096 bytes!\n");
 		return -1;
 	}
 
-	fread(&g_machine.memory[0x200], romsize, 1, rom);
+	fread(&g_machine.memory[0x200], romsize, 1, g_machine.romfile);
+	fclose(g_machine.romfile);
 
 	// load font into memory
 	memcpy(&g_machine.memory[0x00], default_font, sizeof(default_font));

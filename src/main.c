@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
 	}
 
 	// initialize memory
-	if (memory_init(argv[1]) != 0) {
+	g_machine.rompath = argv[1];
+	if (memory_init() != 0) {
 		fprintf(stderr, "Failed to initialize memory!\n");
 		return EXIT_FAILURE;
 	}
@@ -92,6 +93,27 @@ int main(int argc, char *argv[])
     }
 
 	return EXIT_SUCCESS;
+}
+
+void chip8_reboot(void)
+{
+	// reset display
+	memset(g_machine.framebuffer, 0, sizeof(g_machine.framebuffer));
+	display_update();
+
+	// reset cpu
+	memset(&g_machine.cpu, 0, sizeof(g_machine.cpu));
+	if (cpu_init() != 0) {
+		fprintf(stderr, "Failed to initialize CPU!\n");
+		exit(-1);
+	}
+
+	// reset memory
+	memset(g_machine.memory, 0, sizeof(g_machine.memory));
+	if (memory_init() != 0) {
+		fprintf(stderr, "Failed to initialize memory!\n");
+		exit(-1);
+	}
 }
 
 void cleanup_and_die(void)
