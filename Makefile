@@ -6,6 +6,7 @@ LDFLAGS := $(shell pkg-config sdl2 --libs)
 BIN_DIR := bin
 OBJ_DIR := build
 SRC_DIR := src
+DESTDIR ?= /usr/local/bin
 
 TARGET_NAME := c8
 TARGET := $(BIN_DIR)/$(TARGET_NAME)
@@ -25,6 +26,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
 	@printf "  CC $<\n"
 	@$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: install
+install: $(TARGET)
+	@install -m 755 $(TARGET) $(DESTDIR)
 
 .PHONY: format
 format:
