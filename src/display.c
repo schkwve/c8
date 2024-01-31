@@ -9,7 +9,9 @@ SDL_Window *g_win = NULL;
 SDL_Renderer *g_ren = NULL;
 SDL_Texture *g_tex = NULL;
 
-uint8_t g_framebuffer[640 * 320 * 4] = {0};
+// values for the framebuffer can *only* be either 1 or 0.
+// TODO: any other value should crash the program.
+uint8_t g_framebuffer[64 * 32] = {0};
 
 int display_init(void)
 {
@@ -18,23 +20,15 @@ int display_init(void)
 		return EXIT_FAILURE;
 	}
 
-	g_win = SDL_CreateWindow("CHIP-8 Emulator", 100, 100, 640, 320, SDL_WINDOW_SHOWN);
+	g_win = SDL_CreateWindow("CHIP-8 Emulator", 100, 100, WINDOW_WIDTH * 10, WINDOW_HEIGHT * 10, SDL_WINDOW_SHOWN);
 	if (g_win == NULL) {
 		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
-	g_ren = SDL_CreateRenderer(g_win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	g_ren = SDL_CreateRenderer(g_win, -1, SDL_RENDERER_ACCELERATED);
 	if (g_ren == NULL) {
 		fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
-		return -1;
-	}
-
-	SDL_RenderSetLogicalSize(g_ren, 640, 320);
-
-	g_tex = SDL_CreateTexture(g_ren, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, 640, 320);
-	if (g_tex == NULL) {
-		fprintf(stderr, "SDL_CreateTexture Error: %s\n", SDL_GetError());
 		return -1;
 	}
 
@@ -43,40 +37,36 @@ int display_init(void)
 	SDL_RenderClear(g_ren);
 	SDL_RenderPresent(g_ren);
 
+	memset(g_framebuffer, 0, sizeof(g_framebuffer));
+
 	return 0;
 }
 
 void display_clear_screen(void)
 {
-	SDL_SetRenderDrawColor(g_ren, 0, 0, 0, 0);
-	SDL_RenderClear(g_ren);
-	SDL_RenderPresent(g_ren);
+	memset(g_framebuffer, 0, sizeof(g_framebuffer));
 }
 
-void display_draw(uint8_t x, uint8_t y, uint8_t height)
+void display_update(void)
 {
-	// this does not work for some reason
+	// last two parameters are the scale factor (for width and height, respectively)
+    SDL_Rect pixel = {0, 0, 10, 10};
 
-    for (int render_y = 0; render_y < y + height; render_y++) {
-		for (int render_x = 0; render_x < 8; render_x++) {
-			uint8_t loc = 4 * (render_x + x) + render_y + (y + height);
-			if (g_framebuffer[loc] == 255) {
-				g_framebuffer[loc] = 0;
-				cpu.v[0x0F] = 1;
-			} else {
-				g_framebuffer[loc] = 255;
-			}
+    for (uint32_t i = 0; i < sizeof(g_framebuffer); i++) {
+        pixel.x = (i % 64) * 10;
+        pixel.y = (i / 64) * 10;
+
+        if (g_framebuffer[i] == 1) {
+            SDL_SetRenderDrawColor(g_ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            SDL_RenderFillRect(g_ren, &pixel);
+        } else if (g_framebuffer[i] == 0) {
+            SDL_SetRenderDrawColor(g_ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderFillRect(g_ren, &pixel);
+        } else {
+			// TODO: crash the program
+			// printf("Framebuffer contains wrong information!\n");
 		}
-	}
-
-    // update texture with new data
-    int texture_pitch = 0;
-    void* texture_pixels = NULL;
-    if (SDL_LockTexture(g_tex, NULL, &texture_pixels, &texture_pitch) != 0) {
-        SDL_Log("Unable to lock texture: %s", SDL_GetError());
     }
-    else {
-        memcpy(texture_pixels, g_framebuffer, texture_pitch * 320);
-    }
-    SDL_UnlockTexture(g_tex);
+    
+    SDL_RenderPresent(g_ren);
 }

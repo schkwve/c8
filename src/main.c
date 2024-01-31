@@ -40,8 +40,6 @@ int main(int argc, char *argv[])
 	// ~700 instructions per second
 	struct timespec sleep_time = {0, 1428571};
 
-	display_draw(10, 10, 20);
-
 	// main loop
     while (1) {
         if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
@@ -50,9 +48,7 @@ int main(int argc, char *argv[])
 		cpu_execute(cpu_fetch());
 
 		// update window
-		SDL_RenderClear(g_ren);
-        SDL_RenderCopy(g_ren, g_tex, NULL, NULL);
-        SDL_RenderPresent(g_ren);
+        display_update();
 
 		nanosleep(&sleep_time, NULL);
     }

@@ -1,7 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-extern uint16_t memory[4096];
+extern uint8_t g_memory[4096];
 
 int memory_init(char *rom_name);
 

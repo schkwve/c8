@@ -7,6 +7,9 @@ struct cpu {
 	uint16_t pc;
 	uint16_t index;
 
+	uint16_t *sp;
+	uint16_t stack[12];
+
 	uint8_t delay_timer;
 	uint8_t sound_timer;
 
