@@ -18,10 +18,12 @@ all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	@mkdir -p $(@D)
+	@printf "  LD $(notdir $@)\n"
 	@$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c*
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
+	@printf "  CC $<\n"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean

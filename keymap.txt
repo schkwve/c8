@@ -1,8 +1,8 @@
 esc = quit
 f2 = pause/resume
 f5 = reload
-plus = volume +
-minus = volume -
+[ = volume -
+] = volume +
 
 [keypad]
 1 = 1
