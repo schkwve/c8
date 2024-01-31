@@ -41,3 +41,7 @@ Z | X | C | V
 
 ##### Tetris
 ![Tetris](img/tetris.png)
+
+## License
+
+This project is licensed under the [MIT license](https://www.tldrlegal.com/license/mit-license), which can be found [HERE](LICENSE).
