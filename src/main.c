@@ -96,6 +96,10 @@ int main(int argc, char *argv[])
 
 void cleanup_and_die(void)
 {
+	if (g_machine.sound_dev != 0) {
+		SDL_CloseAudioDevice(g_machine.sound_dev);
+	}
+
 	if (g_machine.ren != NULL) {
 		SDL_DestroyRenderer(g_machine.ren);
 	}
