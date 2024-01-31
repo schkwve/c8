@@ -8,6 +8,7 @@
 #include "display.h"
 #include "memory.h"
 #include "input.h"
+#include "sound.h"
 
 machine_t g_machine;
 
@@ -30,6 +31,12 @@ int main(int argc, char *argv[])
 	// initialize display
 	if (display_init() != 0) {
 		fprintf(stderr, "Failed to initialize display!\n");
+		return EXIT_FAILURE;
+	}
+
+	// initialize sound
+	if (sound_init() != 0) {
+		fprintf(stderr, "Failed to initialize sound!\n");
 		return EXIT_FAILURE;
 	}
 
@@ -73,10 +80,10 @@ int main(int argc, char *argv[])
 			g_machine.cpu.delay_timer--;
 		}
 		if (g_machine.cpu.sound_timer > 0) {
-			// TODO: play a beep
+			SDL_PauseAudioDevice(g_machine.sound_dev, 0);
 			g_machine.cpu.sound_timer--;
 		} else {
-			// TODO: stop beeping
+			SDL_PauseAudioDevice(g_machine.sound_dev, 1);
 		}
     }
 

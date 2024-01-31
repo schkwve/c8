@@ -32,13 +32,13 @@ void input_get(void)
 						// chip8_reboot();
 						break;
 					}
-					case SDLK_PLUS: {
-						if (g_machine.sound_volume < 65535) {
+					case SDLK_RIGHTBRACKET: {
+						if (g_machine.sound_volume < INT16_MAX) {
 							g_machine.sound_volume += 250;
 						}
 						break;
 					}
-					case SDLK_MINUS: {
+					case SDLK_LEFTBRACKET: {
 						if (g_machine.sound_volume > 0) {
 							g_machine.sound_volume -= 250;
 						}
