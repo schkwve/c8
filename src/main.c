@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
 	// we are running!
 	g_machine.state = RUNNING;
+	g_machine.should_render = 0;
 
 	// main loop
     while (g_machine.state != QUIT) {
