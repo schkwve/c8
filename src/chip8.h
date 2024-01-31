@@ -10,11 +10,7 @@
 #include "display.h"
 #include "memory.h"
 
-enum machine_state {
-	RUNNING,
-	PAUSED,
-	QUIT
-};
+enum machine_state { RUNNING, PAUSED, QUIT };
 
 typedef struct {
 	// general

@@ -61,27 +61,27 @@ int main(int argc, char *argv[])
 	g_machine.should_render = 0;
 
 	// main loop
-    while (g_machine.state != QUIT) {
-
+	while (g_machine.state != QUIT) {
 		input_get();
 		if (g_machine.state == PAUSED) {
 			continue;
 		}
 
 		const uint64_t start_time = SDL_GetPerformanceCounter();
-        
+
 		for (uint32_t i = 0; i < (700 / 60); i++) {
 			cpu_execute(cpu_fetch());
 		}
 
 		const uint64_t end_time = SDL_GetPerformanceCounter();
-		const double elapsed_time = (double)((end_time - start_time) * 1000) / SDL_GetPerformanceFrequency();
+		const double elapsed_time = (double)((end_time - start_time) * 1000) /
+									SDL_GetPerformanceFrequency();
 
 		SDL_Delay(16.67f > elapsed_time ? 16.67f - elapsed_time : 0);
 
 		if (g_machine.should_render == 1) {
 			g_machine.should_render = 0;
-        	display_update();
+			display_update();
 		}
 
 		if (g_machine.cpu.delay_timer > 0) {
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 		} else {
 			SDL_PauseAudioDevice(g_machine.sound_dev, 1);
 		}
-    }
+	}
 
 	return EXIT_SUCCESS;
 }

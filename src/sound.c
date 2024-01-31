@@ -8,16 +8,14 @@
 
 int sound_init(void)
 {
-	SDL_AudioSpec request = {
-		.freq = 44100,
-		.format = AUDIO_S16LSB,
-		.channels = 1,
-		.samples = 512,
-		.callback = sound_callback,
-		.userdata = NULL
-	};
+	SDL_AudioSpec request = { .freq = 44100,
+							  .format = AUDIO_S16LSB,
+							  .channels = 1,
+							  .samples = 512,
+							  .callback = sound_callback,
+							  .userdata = NULL };
 
-	SDL_AudioSpec response = {0};
+	SDL_AudioSpec response = { 0 };
 
 	g_machine.sound_volume = 500;
 
@@ -27,7 +25,8 @@ int sound_init(void)
 		return -1;
 	}
 
-	if ((request.format != response.format) || (request.channels != response.channels)) {
+	if ((request.format != response.format) ||
+		(request.channels != response.channels)) {
 		fprintf(stderr, "Couldn't get desirable audio device!\n");
 		return -1;
 	}
