@@ -15,12 +15,7 @@ uint8_t g_framebuffer[64 * 32] = {0};
 
 int display_init(void)
 {
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
-		return EXIT_FAILURE;
-	}
-
-	g_win = SDL_CreateWindow("CHIP-8 Emulator", 100, 100, WINDOW_WIDTH * 10, WINDOW_HEIGHT * 10, SDL_WINDOW_SHOWN);
+	g_win = SDL_CreateWindow("CHIP-8 Emulator", 100, 100, WINDOW_WIDTH * WINDOW_SCALE_FACTOR, WINDOW_HEIGHT * WINDOW_SCALE_FACTOR, SDL_WINDOW_SHOWN);
 	if (g_win == NULL) {
 		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
 		return EXIT_FAILURE;
@@ -50,11 +45,11 @@ void display_clear_screen(void)
 void display_update(void)
 {
 	// last two parameters are the scale factor (for width and height, respectively)
-    SDL_Rect pixel = {0, 0, 10, 10};
+    SDL_Rect pixel = {0, 0, WINDOW_SCALE_FACTOR, WINDOW_SCALE_FACTOR};
 
     for (uint32_t i = 0; i < sizeof(g_framebuffer); i++) {
-        pixel.x = (i % 64) * 10;
-        pixel.y = (i / 64) * 10;
+        pixel.x = (i % 64) * WINDOW_SCALE_FACTOR;
+        pixel.y = (i / 64) * WINDOW_SCALE_FACTOR;
 
         if (g_framebuffer[i] == 1) {
             SDL_SetRenderDrawColor(g_ren, 255, 255, 255, SDL_ALPHA_OPAQUE);

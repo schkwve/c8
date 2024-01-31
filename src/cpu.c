@@ -43,7 +43,6 @@ void cpu_execute(uint16_t instruction)
 	uint8_t x = (instruction >> 8) & 0x0F;
 	uint8_t y = (instruction >> 4) & 0x0F;
 
-
 	switch ((instruction >> 12) & 0x0F) {
 		case 0x00: {
 			if (nn == 0xE0) {

@@ -5,6 +5,7 @@
 
 #define WINDOW_WIDTH 64
 #define WINDOW_HEIGHT 32
+#define WINDOW_SCALE_FACTOR 20
 
 extern SDL_Window *g_win;
 extern SDL_Renderer *g_ren;
