@@ -2,44 +2,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "chip8.h"
 #include "cpu.h"
 #include "display.h"
 
-SDL_Window *g_win = NULL;
-SDL_Renderer *g_ren = NULL;
-SDL_Texture *g_tex = NULL;
-
-// values for the framebuffer can *only* be either 1 or 0.
-// TODO: any other value should crash the program.
-uint8_t g_framebuffer[64 * 32] = {0};
-
 int display_init(void)
 {
-	g_win = SDL_CreateWindow("CHIP-8 Emulator", 100, 100, WINDOW_WIDTH * WINDOW_SCALE_FACTOR, WINDOW_HEIGHT * WINDOW_SCALE_FACTOR, SDL_WINDOW_SHOWN);
-	if (g_win == NULL) {
+	g_machine.win = SDL_CreateWindow("CHIP-8 Emulator", 100, 100, WINDOW_WIDTH * WINDOW_SCALE_FACTOR, WINDOW_HEIGHT * WINDOW_SCALE_FACTOR, SDL_WINDOW_SHOWN);
+	if (g_machine.win == NULL) {
 		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
-	g_ren = SDL_CreateRenderer(g_win, -1, SDL_RENDERER_ACCELERATED);
-	if (g_ren == NULL) {
+	g_machine.ren = SDL_CreateRenderer(g_machine.win, -1, SDL_RENDERER_ACCELERATED);
+	if (g_machine.ren == NULL) {
 		fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
 		return -1;
 	}
 
 	// display nothing
-	SDL_SetRenderDrawColor(g_ren, 0, 0, 0, 0);
-	SDL_RenderClear(g_ren);
-	SDL_RenderPresent(g_ren);
+	SDL_SetRenderDrawColor(g_machine.ren, 0, 0, 0, 0);
+	SDL_RenderClear(g_machine.ren);
+	SDL_RenderPresent(g_machine.ren);
 
-	memset(g_framebuffer, 0, sizeof(g_framebuffer));
+	memset(g_machine.framebuffer, 0, sizeof(g_machine.framebuffer));
 
 	return 0;
 }
 
 void display_clear_screen(void)
 {
-	memset(g_framebuffer, 0, sizeof(g_framebuffer));
+	memset(g_machine.framebuffer, 0, sizeof(g_machine.framebuffer));
 }
 
 void display_update(void)
@@ -47,21 +40,21 @@ void display_update(void)
 	// last two parameters are the scale factor (for width and height, respectively)
     SDL_Rect pixel = {0, 0, WINDOW_SCALE_FACTOR, WINDOW_SCALE_FACTOR};
 
-    for (uint32_t i = 0; i < sizeof(g_framebuffer); i++) {
+    for (uint32_t i = 0; i < sizeof(g_machine.framebuffer); i++) {
         pixel.x = (i % 64) * WINDOW_SCALE_FACTOR;
         pixel.y = (i / 64) * WINDOW_SCALE_FACTOR;
 
-        if (g_framebuffer[i] == 1) {
-            SDL_SetRenderDrawColor(g_ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(g_ren, &pixel);
-        } else if (g_framebuffer[i] == 0) {
-            SDL_SetRenderDrawColor(g_ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(g_ren, &pixel);
+        if (g_machine.framebuffer[i] == 1) {
+            SDL_SetRenderDrawColor(g_machine.ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            SDL_RenderFillRect(g_machine.ren, &pixel);
+        } else if (g_machine.framebuffer[i] == 0) {
+            SDL_SetRenderDrawColor(g_machine.ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderFillRect(g_machine.ren, &pixel);
         } else {
 			// TODO: crash the program
 			// printf("Framebuffer contains wrong information!\n");
 		}
     }
     
-    SDL_RenderPresent(g_ren);
+    SDL_RenderPresent(g_machine.ren);
 }

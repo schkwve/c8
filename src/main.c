@@ -8,6 +8,8 @@
 #include "display.h"
 #include "memory.h"
 
+machine_t g_machine;
+
 int main(int argc, char *argv[])
 {
 	SDL_Event event;
@@ -15,6 +17,10 @@ int main(int argc, char *argv[])
 	// register an exit function
 	// to cleanup
 	atexit(cleanup_and_die);
+
+	// initialize a random timer
+	time_t t;
+	srand((unsigned)time(&t));
 
 	// startup SDL
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -61,12 +67,12 @@ int main(int argc, char *argv[])
 
 void cleanup_and_die(void)
 {
-	if (g_ren != NULL) {
-		SDL_DestroyRenderer(g_ren);
+	if (g_machine.ren != NULL) {
+		SDL_DestroyRenderer(g_machine.ren);
 	}
 
-	if (g_win != NULL) {
-		SDL_DestroyWindow(g_win);
+	if (g_machine.win != NULL) {
+		SDL_DestroyWindow(g_machine.win);
 	}
 
 	SDL_Quit();

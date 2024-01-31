@@ -3,9 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "chip8.h"
 #include "memory.h"
-
-uint8_t g_memory[4096];
 
 const uint8_t default_font[] = {
 	0xF0, 0x90, 0x90, 0x90, 0xF0,
@@ -29,7 +28,7 @@ const uint8_t default_font[] = {
 int memory_init(char *rom_name)
 {
 	// zero out memory
-	memset(g_memory, 0, 4096);
+	memset(g_machine.memory, 0, 4096);
 
 	// load program into memory
 	FILE *rom = fopen(rom_name, "rb");
@@ -42,10 +41,10 @@ int memory_init(char *rom_name)
 		return -1;
 	}
 
-	fread(&g_memory[0x200], romsize, 1, rom);
+	fread(&g_machine.memory[0x200], romsize, 1, rom);
 
 	// load font into memory
-	memcpy(&g_memory[0x00], default_font, sizeof(default_font));
+	memcpy(&g_machine.memory[0x00], default_font, sizeof(default_font));
 
 	return 0;
 }

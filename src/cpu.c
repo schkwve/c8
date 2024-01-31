@@ -1,24 +1,23 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "chip8.h"
 #include "cpu.h"
 #include "display.h"
 #include "memory.h"
 
-struct cpu cpu;
-
 int cpu_init(void)
 {
 	// set sane defaults
-	cpu.pc = 0x200;
-	cpu.index = 0;
-	cpu.sp = &cpu.stack[0];
+	g_machine.cpu.pc = 0x200;
+	g_machine.cpu.index = 0;
+	g_machine.cpu.sp = &g_machine.cpu.stack[0];
 
-	cpu.delay_timer = 60;
-	cpu.sound_timer = 60;
+	g_machine.cpu.delay_timer = 60;
+	g_machine.cpu.sound_timer = 60;
 
 	for (int i = 0; i < 16; i++) {
-		cpu.v[i] = 0;
+		g_machine.cpu.v[i] = 0;
 	}
 
 	return 0;
@@ -26,12 +25,12 @@ int cpu_init(void)
 
 uint16_t cpu_fetch(void)
 {
-	if (cpu.pc > 4095) {
-		cpu.pc = 0;
+	if (g_machine.cpu.pc > 4095) {
+		g_machine.cpu.pc = 0;
 	}
 
-	uint16_t ret = (g_memory[cpu.pc] << 8) | (g_memory[cpu.pc + 1]);
-	cpu.pc += 2;
+	uint16_t ret = (g_machine.memory[g_machine.cpu.pc] << 8) | (g_machine.memory[g_machine.cpu.pc + 1]);
+	g_machine.cpu.pc += 2;
 	return ret;
 }
 
@@ -45,81 +44,142 @@ void cpu_execute(uint16_t instruction)
 
 	switch ((instruction >> 12) & 0x0F) {
 		case 0x00: {
-			if (nn == 0xE0) {
+			switch (nn) {
+			case 0xE0:
 				display_clear_screen();
-			} else if (nn == 0xEE) {
-				cpu.pc = *--cpu.sp;
+				break;
+			case 0xEE:
+				g_machine.cpu.pc = *--g_machine.cpu.sp;
+				break;
+			default:
+				fprintf(stderr, "Instruction '%x' not implemented yet!\n", instruction);
+				break;
 			}
 			break;
 		}
 		case 0x01: {
-			cpu.pc = nnn;
+			g_machine.cpu.pc = nnn;
 			break;
 		}
 		case 0x02: {
-			*cpu.sp++ = cpu.pc;
-			cpu.pc = nnn;
+			*g_machine.cpu.sp++ = g_machine.cpu.pc;
+			g_machine.cpu.pc = nnn;
 			break;
 		}
 		case 0x03: {
-			if (cpu.v[x] == nn) {
-				cpu.pc += 2;
+			if (g_machine.cpu.v[x] == nn) {
+				g_machine.cpu.pc += 2;
 			}
 			break;
 		}
 		case 0x04: {
-			if (cpu.v[x] != nn) {
-				cpu.pc += 2;
+			if (g_machine.cpu.v[x] != nn) {
+				g_machine.cpu.pc += 2;
 			}
 			break;
 		}
 		case 0x05: {
-			if (cpu.v[x] == cpu.v[y]) {
-				cpu.pc += 2;
+			if (g_machine.cpu.v[x] == g_machine.cpu.v[y]) {
+				g_machine.cpu.pc += 2;
 			}
 			break;
 		}
 		case 0x06: {
-			cpu.v[x] = nn;
+			g_machine.cpu.v[x] = nn;
 			break;
 		}
 		case 0x07: {
-			cpu.v[x] += nn;
+			g_machine.cpu.v[x] += nn;
 			break;
 		}
 		case 0x08: {
 			switch (n) {
-			case 0: {
-				cpu.v[x] = cpu.v[y];
+			case 0x00: {
+				g_machine.cpu.v[x] = g_machine.cpu.v[y];
+				break;
+			}
+			case 0x01: {
+				g_machine.cpu.v[0x0F] = 0;
+				g_machine.cpu.v[x] |= g_machine.cpu.v[y];
+				break;
+			}
+			case 0x02: {
+				g_machine.cpu.v[0x0F] = 0;
+				g_machine.cpu.v[x] &= g_machine.cpu.v[y];
+				break;
+			}
+			case 0x03: {
+				g_machine.cpu.v[0x0F] = 0;
+				g_machine.cpu.v[x] ^= g_machine.cpu.v[y];
+				break;
+			}
+			case 0x04: {
+				g_machine.cpu.v[0x0F] = ((uint16_t)(g_machine.cpu.v[x] + g_machine.cpu.v[y]) > 255) ? 1 : 0;
+				g_machine.cpu.v[x] += g_machine.cpu.v[y];
+				break;
+			}
+			case 0x05: {
+				g_machine.cpu.v[0x0F] = (g_machine.cpu.v[y] <= g_machine.cpu.v[x]) ? 1 : 0;
+				g_machine.cpu.v[x] -= g_machine.cpu.v[y];
+				break;
+			}
+			case 0x06: {
+				g_machine.cpu.v[0x0F] = g_machine.cpu.v[y] & 1;
+				g_machine.cpu.v[x] = g_machine.cpu.v[y] >> 1;
+				break;
+			}
+			case 0x07: {
+				g_machine.cpu.v[0x0F] = g_machine.cpu.v[y] & 1;
+				g_machine.cpu.v[x] = g_machine.cpu.v[y] - g_machine.cpu.v[x];
+				break;
+			}
+			case 0x0E: {
+				g_machine.cpu.v[0x0F] = (g_machine.cpu.v[y] & 0x80) >> 7;
+				g_machine.cpu.v[x] = g_machine.cpu.v[y] << 1;
 				break;
 			}
 			default: {
+				fprintf(stderr, "Instruction '%x' not implemented yet!\n", instruction);
 				break;
 			}
+			}
+			break;
+		}
+		case 0x09: {
+			if (g_machine.cpu.v[x] != g_machine.cpu.v[y]) {
+				g_machine.cpu.pc += 2;
 			}
 			break;
 		}
 		case 0x0A: {
-			cpu.index = nnn;
+			g_machine.cpu.index = nnn;
+			break;
+		}
+		case 0x0B: {
+			g_machine.cpu.pc = g_machine.cpu.v[0x00] + nnn;
+			break;
+		}
+		case 0x0C: {
+			g_machine.cpu.v[x] = (rand() % 256) & nn;
 			break;
 		}
 		case 0x0D: {
-			uint8_t ren_x = cpu.v[x] % WINDOW_WIDTH;
-            uint8_t ren_y = cpu.v[y] % WINDOW_HEIGHT;
+			uint8_t ren_x = g_machine.cpu.v[x] % WINDOW_WIDTH;
+            uint8_t ren_y = g_machine.cpu.v[y] % WINDOW_HEIGHT;
             const uint8_t ox = ren_x;
 
-            cpu.v[0x0F] = 0;
+            g_machine.cpu.v[0x0F] = 0;
 
             for (uint8_t i = 0; i < n; i++) {
-                const uint8_t sprite_data = g_memory[cpu.index + i];
+                const uint8_t sprite_data = g_machine.memory[g_machine.cpu.index + i];
                 ren_x = ox;
 
                 for (int8_t j = 7; j >= 0; j--) {
-                    uint8_t *pixel = &g_framebuffer[ren_y * WINDOW_WIDTH + ren_x];
+                    uint8_t *pixel = &g_machine.framebuffer[ren_y * WINDOW_WIDTH + ren_x];
                     const uint8_t sprite_bit = (sprite_data & (1 << j)) ? 1 : 0;
 
                     if (sprite_bit && *pixel) {
-                        cpu.v[0x0F] = 1;
+                        g_machine.cpu.v[0x0F] = 1;
                     }
 
                     *pixel ^= sprite_bit;
@@ -131,6 +191,65 @@ void cpu_execute(uint16_t instruction)
             }
 			break;
         }
+		case 0x0E: {
+			switch (nn) {
+			default: {
+				fprintf(stderr, "Instruction '%x' not implemented yet!\n", instruction);
+				break;
+			}
+			}
+			break;
+		}
+		case 0x0F: {
+			switch (nn) {
+			case 0x07: {
+				g_machine.cpu.v[x] = g_machine.cpu.delay_timer;
+				break;
+			}
+			case 0x15: {
+				g_machine.cpu.delay_timer = g_machine.cpu.v[x];
+				break;
+			}
+			case 0x18: {
+				g_machine.cpu.sound_timer = g_machine.cpu.v[x];
+				break;
+			}
+			case 0x1E: {
+				g_machine.cpu.index += g_machine.cpu.v[x];
+				break;
+			}
+			case 0x29: {
+				g_machine.cpu.index = g_machine.memory[g_machine.cpu.index + g_machine.cpu.v[x]];
+				break;
+			}
+			case 0x33: {
+				int num = g_machine.cpu.v[x];
+				g_machine.memory[g_machine.cpu.index + 2] = num % 10;
+				num /= 10;
+				g_machine.memory[g_machine.cpu.index + 1] = num % 10;
+				num /= 10;
+				g_machine.memory[g_machine.cpu.index] = num;
+				break;
+			}
+			case 0x55: {
+				for (int i = 0; i < x; i++) {
+					g_machine.memory[g_machine.cpu.index + i] = g_machine.cpu.v[i];
+				}
+				break;
+			}
+			case 0x65: {
+				for (int i = 0; i < x; i++) {
+					g_machine.cpu.v[i] = g_machine.memory[g_machine.cpu.index + i];
+				}
+				break;
+			}
+			default: {
+				fprintf(stderr, "Instruction '%x' not implemented yet!\n", instruction);
+				break;
+			}
+			}
+			break;
+		}
 		default: {
 			fprintf(stderr, "Instruction '%x' not implemented yet!\n", instruction);
 			break;
